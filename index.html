@@ -111,11 +111,14 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .details {
-            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(.4,0,.2,1);
             margin-top: 15px;
             border-top: 1px solid #eee;
-            padding-top: 15px;
+            padding-top: 0;
             font-size: 0.9em;
+            display: block;
         }
         .details ul {
             margin: 0;
@@ -125,7 +128,8 @@
             margin-bottom: 10px;
         }
         .interactive-card.active .details {
-            display: block;
+            max-height: 500px;
+            padding-top: 15px;
         }
         .interactive-card .prompt {
             text-align: right;
@@ -133,6 +137,7 @@
             color: var(--link-color);
             font-weight: bold;
             margin-top: 10px;
+            user-select: none;
         }
 
         table {
@@ -176,6 +181,48 @@
                 margin: 10px 0;
             }
         }
+        @media (max-width: 600px) {
+    .container {
+        padding: 8px;
+    }
+    section {
+        padding: 1em 0;
+    }
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .card {
+        padding: 12px;
+        font-size: 0.95em;
+    }
+    nav a {
+        font-size: 1em;
+        margin: 8px 0;
+        display: block;
+        padding: 8px 0;
+    }
+    h1 {
+        font-size: 2em;
+    }
+    h2 {
+        font-size: 1.5em;
+    }
+    h3 {
+        font-size: 1.2em;
+    }
+    h4 {
+        font-size: 1em;
+    }
+    table {
+        display: block;
+        overflow-x: auto;
+        font-size: 0.95em;
+    }
+    th, td {
+        padding: 8px;
+    }
+}
     </style>
 </head>
 <body>
@@ -203,7 +250,7 @@
             <h2>Введение: Конвергенция парадигм ИИ</h2>
             <p>Данный проект исследует синергетическую интеграцию малых языковых моделей (МЯМ) в распределенные системы, использующие искусственный роевой интеллект. В нем подробно рассматривается, как МЯМ, характеризующиеся своей эффективностью, предметной специфичностью и низкими требованиями к ресурсам, уникально подходят для роли интеллектуальных агентов в децентрализованных роевых архитектурах.</p>
             <div class="grid">
-                <div class="card interactive-card">
+                <div class="card interactive-card" role="button" tabindex="0" aria-expanded="false">
                     <h3>Малые языковые модели (МЯМ)</h3>
                     <p>МЯМ представляют собой класс языковых моделей, разработанных для работы со значительно меньшим количеством параметров по сравнению с большими языковыми моделями (БЯМ). Это делает их эффективными, быстрыми и идеальными для специализированных задач.</p>
                     <div class="details">
@@ -569,16 +616,23 @@
             const interactiveCards = document.querySelectorAll('.interactive-card');
 
             interactiveCards.forEach(card => {
-                card.addEventListener('click', function () {
-                    // Toggle the 'active' class on the clicked card
-                    this.classList.toggle('active');
+                card.setAttribute('role', 'button');
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('aria-expanded', 'false');
 
-                    // Change the prompt text
-                    const prompt = this.querySelector('.prompt');
-                    if (this.classList.contains('active')) {
-                        prompt.textContent = 'Скрыть детали';
-                    } else {
-                        prompt.textContent = 'Подробнее...';
+                function toggleCard() {
+                    card.classList.toggle('active');
+                    const prompt = card.querySelector('.prompt');
+                    const expanded = card.classList.contains('active');
+                    card.setAttribute('aria-expanded', expanded);
+                    prompt.textContent = expanded ? 'Скрыть детали' : 'Подробнее...';
+                }
+
+                card.addEventListener('click', toggleCard);
+                card.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleCard();
                     }
                 });
             });
